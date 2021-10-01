@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,6 +24,14 @@ public class PlayerController : MonoBehaviour
         if (_rb.velocity.magnitude > maxSpeed)
         {
             _rb.velocity = _rb.velocity.normalized * maxSpeed;
+        }
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.name.Contains("Enemy"))
+        {
+            Application.Quit();
         }
     }
 }
