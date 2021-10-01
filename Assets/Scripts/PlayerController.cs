@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
 
     public float speed;
+    public float maxSpeed;
     
     private Rigidbody _rb;
     
@@ -18,6 +19,10 @@ public class PlayerController : MonoBehaviour
     {
         float horizontal = Input.GetAxis ("Horizontal");
         float vertical = Input.GetAxis ("Vertical");
-        _rb.velocity = new Vector3(horizontal * speed, _rb.velocity.y, vertical * speed);
+        _rb.velocity = new Vector3(horizontal * speed, 0f, vertical * speed);
+        if (_rb.velocity.magnitude > maxSpeed)
+        {
+            _rb.velocity = _rb.velocity.normalized * maxSpeed;
+        }
     }
 }

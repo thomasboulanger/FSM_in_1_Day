@@ -8,59 +8,89 @@ using UnityEngine.AI;
 public class EnemyController : MonoBehaviour
 {
 
-    public GameObject angleOfView;
-
+    private GameObject _target;
     private NavMeshAgent _navMeshAgent;
     private bool _hasSpottedSomeone;
+    private float _chaseDelay = .5f;
+    private float _chaseTimer = 4f;
+    
+    
 
-    enum enemyState
+    enum EnemyState
     {
-        idle,
-        chasing,
-        search
+        Idle,
+        FindSomeone,
+        Chasing,
+        Search
     }
-    private enemyState currentState = enemyState.idle;
+    private EnemyState currentState = EnemyState.Idle;
     
     void Start()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _hasSpottedSomeone = false;
+        
+        if ( GameObject.Find("Player") != null)
+        {
+            _target = GameObject.Find("Player");
+        }
     }
 
     void Update()
     {
         switch (currentState)
         {
-            case enemyState.idle:
+            case EnemyState.Idle:
                 Idle();
-                if (angleOfView)
-                {
-                    
-                }
                 break;
             
-            case enemyState.chasing:
+            case EnemyState.FindSomeone:
+                FindSomeone();
+                break;
+            
+            case EnemyState.Chasing:
                 Chasing();
                 break;
             
-            case enemyState.search:
+            case EnemyState.Search:
                 Search();
                 break;
             
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        _navMeshAgent.destination = GameObject.Find("Player").transform.position;
     }
-
+    
     private void Idle()
     {
-        
+        //walk
+    }
+    
+    private void FindSomeone()
+    {
+        _chaseDelay -= Time.deltaTime;
+        if (_chaseDelay <= 0f)
+        {
+            currentState = EnemyState.Chasing;
+        }
     }
     
     private void Chasing()
     {
-        
+        _chaseDelay = .5f;
+        _chaseTimer -= Time.deltaTime;
+        if (_chaseTimer >= 0f)
+        {
+            _navMeshAgent.destination = _target.transform.position;
+        }
+        else
+        {
+            currentState = EnemyState.Search;
+        }
+        if (_hasSpottedSomeone)
+        {
+            _chaseTimer = 4;
+        }
     }
 
     private void Search()
@@ -70,9 +100,20 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (other.gameObject == _target.gameObject)
         {
             _hasSpottedSomeone = true;
+            currentState = EnemyState.FindSomeone;
+            //text hey !!
+            // barre 
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject == _target.gameObject)
+        {
+            _hasSpottedSomeone = false;
         }
     }
 }
